@@ -1,3 +1,4 @@
+import os
 import time
 import json
 import queue
@@ -7,6 +8,7 @@ import threading
 from easy_crack import EasyCrack
 from configurator import JhackItConfig
 
+os.chdir("/home/pi/Jhack-It")
 
 config = JhackItConfig()
 
@@ -73,7 +75,10 @@ def css_get(filepath):
 @bottle.get("/scripts/<filepath:re:.*\.js>")
 def js_get(filepath):
     return bottle.static_file(filepath, root="js")
-
+    
+@bottle.get("/fonts/<filepath:re.*\.woff2")
+def font_get(filepath):
+    return bottle.static_file(filepath, root="fonts")
 
 @bottle.get("/api/get_state")
 def get_scan_state():
