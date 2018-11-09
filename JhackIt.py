@@ -76,7 +76,7 @@ def css_get(filepath):
 def js_get(filepath):
     return bottle.static_file(filepath, root="js")
     
-@bottle.get("/fonts/<filepath:re.*\.woff2")
+@bottle.get("/fonts/<filepath:re:.*\.(eot|otf|svg|ttf|woff|woff2?)>")
 def font_get(filepath):
     return bottle.static_file(filepath, root="fonts")
 
