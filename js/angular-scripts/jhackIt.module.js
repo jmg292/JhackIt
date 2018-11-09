@@ -1,0 +1,1 @@
+var jhackIt = angular.module("jhackItModule", ["scanStateService", "scanStateController"]);

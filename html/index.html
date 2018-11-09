@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jhack-It</title>
+
+    <!--Materialize Imports-->
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="/scripts/materialize.min.js"></script>
+
+    <!--Angular Imports-->
+    <script src="/scripts/angular.min.js"></script>
+    <script src="/scripts/angular-scripts/app.module.js"></script>
+    <script src="/scripts/angular-scripts/scanState.service.js"></script>
+    <script src="/scripts/angular-scripts/scanState.controller.js"></script>
+    <script src="/scripts/angular-scripts/jhackIt.module.js"></script>
+    <script src="/scripts/angular-scripts/cleanColon.filter.js"></script>
+    <script src="/scripts/angular-scripts/disabled.filter.js"></script>
+    <script src="/scripts/angular-scripts/hidden-essid.filter.js"></script>
+
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+    <!--Import custom stylesheet-->
+    <link type="text/css" rel="stylesheet" href="css/style.css" media="screen,projection"/>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body ng-app="jhackIt">
+    <div ng-controller="scanStateController as ctrl">
+        <nav class="light-blue darken-1" role="navigation">
+            <div class="nav-wrapper container">
+                <a href="#" class="brand-logo">Jhack-It</a>
+                <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <ul id="nav-mobile" class="right hide-on-med-and-down">
+                    <li><a href="#" id="using_interface">Interface: {{interface}}</a></li>
+                    <li><a href="#" id="monitor_enabled">Monitor Mode: {{monitor_enabled}}</a></li>
+                    <li><a href="#" id="target_essid" ng-click="ctrl.clearTarget()">Target ESSID: {{target_essid | hiddenEssid}}</a></li>
+                    <li><a href="#" id="target_bssid" ng-click="ctrl.clearTarget()">Target BSSID: {{target_bssid}}</a></li>
+                    <li><a href="#" id="target_client" ng-click="ctrl.clearTarget()">Target Client: <div id="target-client-mac">{{target_client}}</div></a></li>
+                </ul>
+                <ul class="sidenav" id="mobile-nav">
+                    <li><a href="#" id="using_interface">Interface: {{interface}}</a></li>
+                    <li><a href="#" id="monitor_enabled">Monitor Mode: {{monitor_enabled}}</a></li>
+                    <li><a href="#" id="target_essid" ng-click="ctrl.clearTarget()">Target ESSID: {{target_essid | hiddenEssid}}</a></li>
+                    <li><a href="#" id="target_bssid" ng-click="ctrl.clearTarget()">Target BSSID: {{target_bssid}}</a></li>
+                    <li><a href="#" id="target_client" ng-click="ctrl.clearTarget()">Target Client: <div id="target-client-mac">{{target_client}}</div></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="row">
+                <div class="col s12 cards-container" ng-repeat="bssid in scanned_bssids">
+
+                        <div class="card" id="{{bssid | cleanColon}}-card">
+                            <div class="card-content">
+                                <p id="{{bssid | cleanColon}}-bssid" style="text-align: center; font-weight: bold">BSSID: {{bssid}}</p>
+                                <ul>
+                                    <li><p id="{{bssid | cleanColon}}-essid"><strong>ESSID: </strong>{{scan_data[bssid].ESSID | hiddenEssid}}</p></li>
+                                    <li><p id="{{bssid | cleanColon}}-client-count"><strong>Client count: </strong>{{scan_data[bssid].clients.length}}</p></li>
+                                    <li><p id="{{bssid | cleanColon}}-security"><strong>Security: </strong>{{scan_data[bssid].Privacy}}</p></li>
+                                    <li><p id="{{bssid | cleanColon}}-power"><strong>TX Power: </strong>{{scan_data[bssid].Power}}</p></li>
+                                </ul>
+                                <a class="waves-effect waves-light btn" ng-click="ctrl.acquireTarget(bssid, null);">
+                                    <i class="material-icons right">signal_wifi_4_bar_lock</i>Target
+                                </a>
+                                <a class="waves-effect waves-light btn right {{ctrl.isTargetingSomething() | disabledFilter}}" ng-click="ctrl.launchDeauths(null);">
+                                    <i class="material-icons right">signal_wifi_off</i>Deauth
+                                </a>
+                            </div>
+                            <div class="card-tabs">
+                                <ul class="tabs tabs-fixed-width">
+                                    <li class="tab"><a class="active" href="#{{bssid | cleanColon}}-hide-details">Hidden</a></li>
+                                    <li class="tab"><a href="#{{bssid | cleanColon}}-ap-details">AP Details</a></li>
+                                    <li class="tab"><a href="#{{bssid | cleanColon}}-client-details">Clients</a></li>
+                                </ul>
+                            </div>
+                            <div class="card-content grey lighten-4">
+                                <div id="{{bssid | cleanColon}}-hide-details"></div>
+                                <div id="{{bssid | cleanColon}}-ap-details">
+                                    <ul>
+                                        <li><p id="{{bssid | cleanColon}}-FirstTimeSeen">First seen: {{scan_data[bssid].FirstTimeSeen}}</p></li>
+                                        <li><p id="{{bssid | cleanColon}}-LastTimeSeen">Last seen: {{scan_data[bssid].LastTimeSeen}}</p></li>
+                                        <li><p id="{{bssid | cleanColon}}-Speed">Network Speed: {{scan_data[bssid].Speed}}</p></li>
+                                        <li><p id="{{bssid | cleanColon}}-Authentication">Auth mode: {{scan_data[bssid].Authentication}}</p></li>
+                                        <li><p id="{{bssid | cleanColon}}-Cipher">Cipher: {{scan_data[bssid].Cipher}}</p></li>
+                                        <li><p id="{{bssid | cleanColon}}-channel">Channel: {{scan_data[bssid].channel}}</p></li>
+                                        <li><p id="{{bssid | cleanColon}}-beacons">Beacons: {{scan_data[bssid].beacons}}</p></li>
+                                        <li><p id="{{bssid | cleanColon}}-IV">IVs: {{scan_data[bssid].IV}}</p></li>
+                                    </ul>
+                                </div>
+                                <div id="{{bssid | cleanColon}}-client-details">
+                                    <div  ng-repeat="client in scan_data[bssid].clients">
+                                        <div id="{{client['Station MAC'] | cleanColon}}-Details">
+                                            <div class="section">
+                                                <p style="text-align: center"><strong>Station ID: </strong>{{client["Station MAC"]}}</p>
+                                                <ul>
+                                                    <li><p id="{{client['Station MAC'] | cleanColon}}-packets">Packets: {{client["# packets"]}}</p></li>
+                                                    <li><p id="{{client['Station MAC'] | cleanColon}}-power">Power: {{client["Power"]}}</p></li>
+                                                    <li><p id="{{client['Station MAC'] | cleanColon}}-essids">Probed ESSIDs: {{client["Probed ESSIDs"]}}</p></li>
+                                                </ul>
+                                            </div>
+                                            <div class="center-align section">
+                                                <a class="waves-effect waves-light btn-small" ng-click="ctrl.acquireTarget(bssid, client['Station MAC']);">
+                                                    <i class="material-icons right">wifi_tethering</i>Target
+                                                </a>
+                                            </div>
+                                            <div class="divider"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!--BEGIN Init function-->
+    <script>
+        $(document).ready(function() {
+            M.AutoInit();
+        });
+    </script>
+    <!--END Init Function-->
+</body>
+</html>
